@@ -1,0 +1,23 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteBase /bwajes/
+
+    # SEO friendly url
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^post/([0-9]+)/(.+?)$ post.php?p=$1&t=$2 [NC,L]
+
+    # removing the php extension
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+    # Redirect the .php extension to the non .php extension
+    RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+    RewriteRule ^ /%1 [L,R=301,NE]
+
+    # preventing hotlinking
+    # RewriteCond %{HTTP_REFERER} !^$
+    # RewriteCond %{HTTP_REFERER} !^https://(www\.)?andadel.com [NC]
+    # RewriteRule \.(gif|jpe?g?|png)$ - [NC,F,L]
+</IfModule>
+Options All -Indexes
