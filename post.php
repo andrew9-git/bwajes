@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="content">
-            <h2 style="text-align: center;">My title here<?php echo '<br>'. urldecode($_GET['p']); echo '<br>'. urldecode($_GET['t'])?></h2><br>
+            <h2 style="text-align: center;">My title here</h2><br>
             <div class="google-ads">
                 Google ads
             </div><br>
