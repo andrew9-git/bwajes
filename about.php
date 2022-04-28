@@ -40,7 +40,7 @@
                 <div style="width: 100%;">
                     <p class="bwajes-plus">Recent on bwajes+</p>
                     <div class="posts">
-                        <a href="post/4/<?php echo urlencode('#'); ?>" class="bwajes">
+                        <a href="post/4/<?php echo htmlentities(rawurlencode('#')); ?>" class="bwajes">
                             <div>
                                 <!-- Use php to shorten the title to 20 - 30 characters, increase if less than 20 characters -->
                                 <span><img src="../images/andi.png" alt=""> Andrew Adelodun</span>
