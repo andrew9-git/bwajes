@@ -1,9 +1,11 @@
 
 <?php
-
+ob_start();
+session_start();
+include_once('includes/functions.php');
 function bwajes_plus_header($title, $description)
 {
-    $host='http://localhost:9090/bwajes/';    
+    $host = url()[0];
 ?>
 <!DOCTYPE html>
 <html lang="en">

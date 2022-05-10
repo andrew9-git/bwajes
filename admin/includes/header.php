@@ -1,6 +1,8 @@
 
 <?php
-
+ob_start();
+session_start();
+include_once('includes/functions.php');
 function bwajes_plus_header($title, $description)
 {?>
 <!DOCTYPE html>

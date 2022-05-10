@@ -1,8 +1,8 @@
 <?php
 
-    $host='http://localhost:9090/bwajes/';
-    
-    $host1='http://localhost:9090/andadel/';  
+    include_once('includes/functions.php');
+    $host = url()[0];
+    $host1 = url()[1];
 
 ?>
 <footer>
@@ -43,3 +43,8 @@
     <script src="<?php echo $host .'assets/js/script.js'; ?>"></script>
 </body>
 </html>
+<?php
+
+ob_end_flush();
+
+?>
