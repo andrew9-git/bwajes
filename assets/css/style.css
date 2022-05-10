@@ -328,6 +328,12 @@ textarea.form-control {
 .card-footer:first-child{
     border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;
 }
+.card.success{
+    color: #28a745;
+}
+.card.error{
+    color: #dc3545;
+}
 #remember-me{
     line-height: 50px;
 }
