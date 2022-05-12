@@ -3,7 +3,7 @@
 ob_start();
 session_start();
 include_once('includes/functions.php');
-$csrf = csrf_token();
+$_SESSION['csrf'] = csrf_token();
 function bwajes_plus_header($title, $description)
 {
     $host = url()[0];

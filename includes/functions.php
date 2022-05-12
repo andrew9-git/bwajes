@@ -1,7 +1,7 @@
 <?php
 
 // Database instantiation
-require_once('includes/db.php');
+require_once('db.php');
 
 function db($dbname)
 {
@@ -54,12 +54,10 @@ function csrf_token()
 
 // Form validation functions
 
-//error array
-$error = array();
-
 //presence
 function has_presence($value, $msg = "No value provided")
 {
+    global $errors;
     // $value = trim($value);
     if(!isset($value) || $value === "")
     {
@@ -74,13 +72,14 @@ function has_presence($value, $msg = "No value provided")
 //string length
 function accepted_field_length($value, $min, $max)
 {
+    global $errors;
     if(strlen($value) < $min)
     {
-        $errors[] = 'The characters should not be less than' . $min;
+        $errors[] = "$value is lesser than " . $min . " characters";
     }
     elseif(strlen($value) > $max)
     {
-        $errors[] = 'The characters should not be greater than' . $max;
+        $errors[] = substr($value, 0, 8). " is greater than " . $max . " characters";
     }
     else
     {
@@ -89,8 +88,10 @@ function accepted_field_length($value, $min, $max)
 }
 
 //type
-function accepted_data_type($value, $field_type)
+function accepted_data_type($value, $field_type, $msg='')
 {
+    global $errors;
+
     switch($field_type)
     {
         case 'int': 
@@ -124,23 +125,46 @@ function accepted_data_type($value, $field_type)
             }
         break;
         case 'str': 
-            if(preg_match('/[^A-Za-Z0-9\-_ ]/', $value))
+            if(preg_match('/[^A-Za-z\-]/', $value))
             {
-                $errors[] = $value . 'is not a valid character'; 
+                $errors[] = $msg; 
             }
             else
             {
                 return true;
             }
         break;
+        case 'str1': 
+            if(preg_match('/[^A-Za-z0-9\-_ ]/', $value))
+            {
+                $errors[] = $msg; 
+            }
+            else
+            {
+                return true;
+            }
+        break;
+        case 'str2': 
+            if(preg_match('/[^A-Za-z0-9\?\|\[\]\(\)\{\}\-_ ]/', $value))
+            {
+                $errors[] = $msg; 
+            }
+            else
+            {
+                return true;
+            }
+        break;
+        default: return false;
+        break;
     }
 }
 //inclusion in a set
-function found_in($value, array $set)
+function found_in($value, array $set, $msg='This is file type is not valid')
 {
+    global $errors;
     if(!in_array($value, $set))
     {
-        $errors[] = 'This is file type is not valid'; 
+        $errors[] = $msg; 
     }
     else
     {
@@ -151,6 +175,7 @@ function found_in($value, array $set)
 //format
 function matches_format($regex, $value)
 {
+    global $errors;
     if(!preg_match($regex, $value))
     {
         $errors[] = 'A match was not found'; 
@@ -161,10 +186,39 @@ function matches_format($regex, $value)
     }
 }
 
-//validate token
-function csrf_is_valid($csrf)
+//validate gender field
+function accepted_gender($gender)
 {
-    if (hash_equals($csrf, $_POST['csrf']) === false)
+    global $errors;
+    if($gender === 'S')
+    {
+        $errors[] = 'Please select a gender'; 
+    }
+    else
+    {
+        return true;
+    }
+}
+
+//validate gender field
+function is_checked($value, $checkbox_name)
+{
+    global $errors;
+    if($value == 0)
+    {
+        $errors[] = "You need to accept $checkbox_name"; 
+    }
+    else
+    {
+        return true;
+    }
+}
+
+//validate token
+function csrf_is_valid($session_csrf, $post_csrf)
+{
+    global $errors;
+    if (hash_equals($_SESSION['csrf'], $post_csrf) === false)
     {
         $errors[] = 'Oops something went wrong. Please try again later';
     }
@@ -203,16 +257,89 @@ function form_errors(array $errors)
 
 // Database queries
 
-//uniqueness
-function db_row_count($value, $column_name, $table_name, $dbname)
+//uniqueness and row count
+function db_row_count($value, $column_name, $table_name, $error=0,$dbname='bwajes+')
 {
+    global $errors;
+
     $db = db($dbname);
 
     $query = "SELECT COUNT(*) FROM $table_name WHERE $column_name = $value";
     $db->prep($query);
     $count = $db->fetchCol();
 
-    return $count;
+    //if the purpose is to display errors
+    if($error == 1 && $count > 0)
+    {
+        $errors[] = 'This account already exist. Please login instead';
+        return true;
+    }
+    else
+    {
+        return $count;
+    }
+
+}
+
+//inserting values into email list table
+
+function insert_into_email_list(array $values, $dbname='bwajes+')
+{
+    global $errors;
+
+    $db = db($dbname);
+
+    $query = "INSERT INTO email_list(first_name, email, source) VALUES(:first_name, :email, :source)";
+
+    $db->prep($query);
+
+    $db->bindvalue(':first_name', $values[0], 'str');
+    $db->bindvalue(':email', $values[1], 'str');
+    $db->bindvalue(':source', $values[2], 'str');
+
+    $execute = $db->execute();
+
+    if($execute)
+    {
+        return true;
+    }
+    else
+    {
+        $errors[] = 'Oops... Something went wrong. Please try again later';
+    }
+
+
+    return $execute;
+}
+
+//inserting values into users table
+
+function insert_into_users(array $value, $dbname='bwajes+')
+{
+    global $errors;
+
+    $db = db($dbname);
+
+    $query = "INSERT INTO users(first_name, last_name, email, business_name, gender, password) VALUES(:first_name, :last_name, :email, :business_name, :gender, :password)";
+    $db->prep($query);
+
+    $db->bindvalue(':first_name', $value[0], 'str');
+    $db->bindvalue(':last_name', $value[1], 'str');
+    $db->bindvalue(':email', $value[2], 'str');
+    $db->bindvalue(':business_name', $value[3], 'str');
+    $db->bindvalue(':gender', $value[4], 'str');
+    $db->bindvalue(':password', $value[5], 'str');
+
+    $execute = $db->execute();
+
+    if($execute)
+    {
+        return true;
+    }
+    else
+    {
+        $errors[] = 'Oops... Something went wrong. Please try again later';
+    }
 }
 
 // End database queries

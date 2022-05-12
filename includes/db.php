@@ -65,6 +65,12 @@
             return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
+        public function count()
+        {
+            $this->execute();
+            return $this->stmt->rowCount();
+        }
+
         public function fetchCol()
         {
             $this->execute();
