@@ -8,8 +8,8 @@
 
     <div class="wrapper form">
         <div class="content form">
-            <div id="test"></div>
             <form id="register_form">
+                <div id="registration_messages"></div>
                 <div class="form-group">
                     <input type="hidden" class="form-control form_data" name="csrf" value="<?php echo $_SESSION['csrf']; ?>" id="csrf">
                 </div>
@@ -49,7 +49,7 @@
                 <div class="form-group">
                     <a style="color: white;" href="login">Sign me in instead</a>
                 </div>
-                <button name="register" class="btn btn-success form-control">Sign up</button>
+                <button name="register" class="btn btn-success form-control" id="registration_button">Sign up</button>
             </form>
         </div>
     </div>
@@ -57,11 +57,13 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         let form = document.getElementById('register_form');
+        let registration_button = document.getElementById('registration_button');
         form.addEventListener('submit', register_user);
 
         function register_user(e)
         {
             e.preventDefault();
+            registration_button.disabled = true;
             let form_element = document.getElementsByClassName('form_data');
             let form_data = new FormData();
 
@@ -92,9 +94,12 @@
             {
                 if(this.status == 200)
                 {
+                    registration_button.disabled = false;
+
                     let response = xhr.responseText;
-                    console.log(response);
-                    // document.getElementById('test').innerHTML = response;
+                    // console.log(response);
+                    document.getElementById('registration_messages').innerHTML = response;
+                    form.reset();
                 }
             }
             

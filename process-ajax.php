@@ -1,11 +1,7 @@
 <?php
-use PHPMAILER\PHPMAILER\PHPMAILER;
-use PHPMAILER\PHPMAILER\SMTP;
-use PHPMAILER\PHPMAILER\EXCEPTION;
-
-require('vendor/autoload.php');
 
 require_once('includes/functions.php');
+include('includes/phpmailer.php');
 session_start();
 
 if(isset($_POST['csrf']))
@@ -117,8 +113,8 @@ if(isset($_POST['csrf']))
     if(csrf_is_valid($_SESSION['csrf'], $post_csrf) && first_name_validated() && last_name_validated() && email_validated() && business_name_validated() && accepted_gender($gender) && TOS_validated() && PRIP_validated())
     {
         //checking if the user already exists
-        $user_exists = db_row_count($email, 'email', 'users', 1);
-        if($user_exists !== true)
+        $count = db_row_count($email, 'email', 'users');
+        if($count <= 0)
         {
             //insert user into email list table with source of 'u'
             $values = array($first_name, $email, 'u');
@@ -134,64 +130,41 @@ if(isset($_POST['csrf']))
 
                 if($executed)
                 {
-                    //sending password to user via email
-                    //Create an instance; passing `true` enables exceptions
-                    $mail = new PHPMailer(true);
+                    $set_from = array(
+                        'email' => 'support@bwajes-plus.andadel.com',
+                        'name' => 'bwajes+'
+                    );
 
-                    try {
-                        //Server settings
-                        $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-                        $mail->isSMTP();
-                        $mail->Host       = 'smtp.gmail.com';
-                        $mail->SMTPAuth   = true;
-                        $mail->Username   = 'andrewadelodun@gmail.com';
-                        $mail->Password   = 'unilagadmissions';
-                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-                        $mail->Port       = 465;
+                    $name = $first_name. ' ' . $last_name;
+                    $add_address = array(
+                        'email' => $email,
+                        'name' => $name
+                    );
 
-                        //Recipients
-                        $mail->setFrom('andrewadelodun@gmail.com', 'Andrew');
-                        $user_name = $first_name . ' ' . $last_name;
-                        $mail->addAddress($email, $user_name);
-                        $mail->addReplyTo('no-reply@gmail.com', 'Do not reply to this mail');
-                        // $mail->addCC('cc@example.com');
-                        // $mail->addBCC('bcc@example.com');
+                    $data = array(
+                        'password' => $password
+                    );
 
-                        //Attachments
-                        // $mail->addAttachment('/var/tmp/file.tar.gz');
-                        // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');
-
-                        //Content
-                        $mail->isHTML(true);                                  //Set email format to HTML
-                        $mail->Subject = 'Getting started with bwajes+';
-                        $mail->Body    = 'Your <b>password</b> is' . $password;
-                        $mail->AltBody = 'Your password is' . $password;
-
-                        if($mail->send())
-                        {
-                            // $msg = "You've successfully registered and your account has been activated. Please login";
-                            // set_msg($msg);
-                            // redirect_to('login');
-                            echo 'successful registration!';
-                        }
-                        
-                    } catch (Exception $e) {
-                        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                    }
+                    send_mail($set_from, $add_address, $data, 1);
+                }
+                else
+                {
+                    echo '<div class="card error">Ooops...Something went wrong. Please try again later';
                 }
             }
+            else
+            {
+                echo '<div class="card error">Ooops...Something went wrong. Please try again later';
+            }
+        }
+        else
+        {
+            echo '<div class="card error">This account already exists. Please login';
         }
     }
     else
     {
         form_errors($errors);
-    }
-
-    echo $password.'<br>';
-    echo $hashed_password.'<br>';
-    if(password_verify($password, $hashed_password))
-    {
-        echo 'password matches with hash!';
     }
 
 }

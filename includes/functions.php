@@ -3,7 +3,7 @@
 // Database instantiation
 require_once('db.php');
 
-function db($dbname)
+function db($dbname='bwajes+')
 {
     $db = new dbase($dbname);
     return $db;
@@ -145,7 +145,7 @@ function accepted_data_type($value, $field_type, $msg='')
             }
         break;
         case 'str2': 
-            if(preg_match('/[^A-Za-z0-9\?\|\[\]\(\)\{\}\-_ ]/', $value))
+            if(preg_match('/[^A-Za-z0-9&\?\|\[\]\(\)\{\}\-_ ]/', $value))
             {
                 $errors[] = $msg; 
             }
@@ -258,27 +258,17 @@ function form_errors(array $errors)
 // Database queries
 
 //uniqueness and row count
-function db_row_count($value, $column_name, $table_name, $error=0,$dbname='bwajes+')
+function db_row_count($value, $column_name, $table_name, $dbname='bwajes+', $type='str')
 {
-    global $errors;
+    // global $errors;
 
     $db = db($dbname);
 
-    $query = "SELECT COUNT(*) FROM $table_name WHERE $column_name = $value";
+    $query = "SELECT COUNT(*) FROM $table_name WHERE $column_name = :value";
     $db->prep($query);
+    $db->bindvalue(':value', $value, $type);
     $count = $db->fetchCol();
-
-    //if the purpose is to display errors
-    if($error == 1 && $count > 0)
-    {
-        $errors[] = 'This account already exist. Please login instead';
-        return true;
-    }
-    else
-    {
-        return $count;
-    }
-
+    return $count;
 }
 
 //inserting values into email list table
