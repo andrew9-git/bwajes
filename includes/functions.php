@@ -55,13 +55,13 @@ function csrf_token()
 // Form validation functions
 
 //presence
-function has_presence($value, $msg = "No value provided")
+function has_presence($value)
 {
-    global $errors;
+    
     // $value = trim($value);
     if(!isset($value) || $value === "")
     {
-       $errors[] = $msg; 
+       return false;
     }
     else
     {
@@ -72,14 +72,10 @@ function has_presence($value, $msg = "No value provided")
 //string length
 function accepted_field_length($value, $min, $max)
 {
-    global $errors;
-    if(strlen($value) < $min)
+    
+    if(strlen($value) < $min  && strlen($value) > $max)
     {
-        $errors[] = "$value is lesser than " . $min . " characters";
-    }
-    elseif(strlen($value) > $max)
-    {
-        $errors[] = substr($value, 0, 8). " is greater than " . $max . " characters";
+        return false; 
     }
     else
     {
@@ -88,16 +84,16 @@ function accepted_field_length($value, $min, $max)
 }
 
 //type
-function accepted_data_type($value, $field_type, $msg='')
+function accepted_data_type($value, $field_type)
 {
-    global $errors;
+    
 
     switch($field_type)
     {
         case 'int': 
             if(!filter_var($value, FILTER_VALIDATE_INT))
             {
-                $errors[] = 'Only numbers are allowed'; 
+                return false;  
             }
             else
             {
@@ -107,7 +103,7 @@ function accepted_data_type($value, $field_type, $msg='')
         case 'email':
             if(!filter_var($value, FILTER_VALIDATE_EMAIL))
             {
-                $errors[] = 'The email provided is not valid'; 
+                return false;  
             }
             else
             {
@@ -117,7 +113,7 @@ function accepted_data_type($value, $field_type, $msg='')
         case 'url': 
             if(!filter_var($value, FILTER_VALIDATE_URL))
             {
-                $errors[] = $value . 'is not a valid url'; 
+                return false;  
             }
             else
             {
@@ -127,7 +123,7 @@ function accepted_data_type($value, $field_type, $msg='')
         case 'str': 
             if(preg_match('/[^A-Za-z\-]/', $value))
             {
-                $errors[] = $msg; 
+                return false; 
             }
             else
             {
@@ -137,7 +133,7 @@ function accepted_data_type($value, $field_type, $msg='')
         case 'str1': 
             if(preg_match('/[^A-Za-z0-9\-_ ]/', $value))
             {
-                $errors[] = $msg; 
+                return false; 
             }
             else
             {
@@ -147,7 +143,7 @@ function accepted_data_type($value, $field_type, $msg='')
         case 'str2': 
             if(preg_match('/[^A-Za-z0-9&\?\|\[\]\(\)\{\}\-_ ]/', $value))
             {
-                $errors[] = $msg; 
+                return false;
             }
             else
             {
@@ -161,10 +157,10 @@ function accepted_data_type($value, $field_type, $msg='')
 //inclusion in a set
 function found_in($value, array $set, $msg='This is file type is not valid')
 {
-    global $errors;
+    
     if(!in_array($value, $set))
     {
-        $errors[] = $msg; 
+        return false;  
     }
     else
     {
@@ -175,10 +171,10 @@ function found_in($value, array $set, $msg='This is file type is not valid')
 //format
 function matches_format($regex, $value)
 {
-    global $errors;
+    
     if(!preg_match($regex, $value))
     {
-        $errors[] = 'A match was not found'; 
+        return false;  
     }
     else
     {
@@ -189,10 +185,10 @@ function matches_format($regex, $value)
 //validate gender field
 function accepted_gender($gender)
 {
-    global $errors;
+    
     if($gender === 'S')
     {
-        $errors[] = 'Please select a gender'; 
+        return false;  
     }
     else
     {
@@ -200,13 +196,13 @@ function accepted_gender($gender)
     }
 }
 
-//validate gender field
+//validate checkbox field
 function is_checked($value, $checkbox_name)
 {
-    global $errors;
+    
     if($value == 0)
     {
-        $errors[] = "You need to accept $checkbox_name"; 
+        return false; 
     }
     else
     {
@@ -217,10 +213,10 @@ function is_checked($value, $checkbox_name)
 //validate token
 function csrf_is_valid($session_csrf, $post_csrf)
 {
-    global $errors;
+    
     if (hash_equals($_SESSION['csrf'], $post_csrf) === false)
     {
-        $errors[] = 'Oops something went wrong. Please try again later';
+        return false;
     }
     else
     {
@@ -235,11 +231,8 @@ function form_errors(array $errors)
     $output = "";
     if(!empty($errors))
     {
-        $output .= "<div class=\"card error\">";
-        $output .= "<div class=\"card-header\">";
-        $output .= "Please fix the folllowing errors";
-        $output .= "</div>";
-        $output .= "<div class=\"card-body\">";
+        $output .= "<div class='card error'>";
+        $output .= "<div>";
         $output .= "<ul>";
         foreach($errors as $key => $error)
         {
@@ -249,8 +242,7 @@ function form_errors(array $errors)
         $output .= "</div>";
         $output .= "</div>";
     }
-    echo $output;
-    $output = null;
+    return $output;
 }
 
 // End form validation functions
@@ -260,9 +252,9 @@ function form_errors(array $errors)
 //uniqueness and row count
 function db_row_count($value, $column_name, $table_name, $dbname='bwajes+', $type='str')
 {
-    // global $errors;
+    // 
 
-    $db = db($dbname);
+    $db = new dbase($dbname);
 
     $query = "SELECT COUNT(*) FROM $table_name WHERE $column_name = :value";
     $db->prep($query);
@@ -275,9 +267,9 @@ function db_row_count($value, $column_name, $table_name, $dbname='bwajes+', $typ
 
 function insert_into_email_list(array $values, $dbname='bwajes+')
 {
-    global $errors;
+    
 
-    $db = db($dbname);
+    $db = new dbase($dbname);
 
     $query = "INSERT INTO email_list(first_name, email, source) VALUES(:first_name, :email, :source)";
 
@@ -295,7 +287,7 @@ function insert_into_email_list(array $values, $dbname='bwajes+')
     }
     else
     {
-        $errors[] = 'Oops... Something went wrong. Please try again later';
+        return false;
     }
 
 
@@ -306,9 +298,9 @@ function insert_into_email_list(array $values, $dbname='bwajes+')
 
 function insert_into_users(array $value, $dbname='bwajes+')
 {
-    global $errors;
+    
 
-    $db = db($dbname);
+    $db = new dbase($dbname);
 
     $query = "INSERT INTO users(first_name, last_name, email, business_name, gender, password) VALUES(:first_name, :last_name, :email, :business_name, :gender, :password)";
     $db->prep($query);
@@ -328,7 +320,7 @@ function insert_into_users(array $value, $dbname='bwajes+')
     }
     else
     {
-        $errors[] = 'Oops... Something went wrong. Please try again later';
+        return false;
     }
 }
 

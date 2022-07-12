@@ -154,6 +154,18 @@ html{
     background-repeat:no-repeat;
     background-size:cover;
 }
+.content .users .bwajes.academicians{
+    background:
+    linear-gradient(to right, rgba(0,0,0,.9), rgba(0,0,0,.7)), url('../../images/academician.png');
+    background-repeat:no-repeat;
+    background-size:cover;
+}
+.content .users .bwajes.editors{
+    background:
+    linear-gradient(to right, rgba(0,0,0,.9), rgba(0,0,0,.7)), url('../../images/editor.jpg');
+    background-repeat:no-repeat;
+    background-size:cover;
+}
 .content .users .bwajes.journalist{
     background:
     linear-gradient(to right, rgba(0,0,0,.9), rgba(0,0,0,.7)), url('../../images/journal.jpg');
@@ -330,9 +342,26 @@ textarea.form-control {
 }
 .card.success{
     color: #28a745;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5%;
+    font-size: 1rem;
+    text-align: center;
+    line-height: 1.5rem;
 }
 .card.error{
     color: #dc3545;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10%;
+    font-size: 1rem;
+    text-align: center;
+    line-height: 1.5rem;
+}
+.card.error ul{
+    list-style: none;
 }
 #remember-me{
     line-height: 50px;

@@ -2,11 +2,12 @@
 
 require_once('includes/functions.php');
 include('includes/phpmailer.php');
+include('includes/email-template.php');
 session_start();
 
-if(isset($_POST['csrf']))
+if(isset($_POST['email']))
 {
-    $post_csrf = $_POST['csrf'];
+    // $post_csrf = $_POST['csrf'];
     $first_name = trim($_POST['firstname']);
     $last_name = trim($_POST['lastname']);
     $email = trim($_POST['email']);
@@ -23,101 +24,101 @@ if(isset($_POST['csrf']))
 
     //error array
     $errors = array();
+
+    // if(csrf_is_valid($_SESSION['csrf'], $post_csrf) == false)
+    // {
+    //     $errors[] = 'Ooops...Something went wrong. Please try again later';
+    // }
+    if(has_presence($first_name) == false)
+    {
+        $errors[] = 'First name cannot be empty';
+    }
+    elseif(strlen($first_name) < 2)
+    {
+        $name = ucfirst($first_name);
+        $errors[] = $name . ' cannot be lesser than 2 characters';
+    }
+    elseif(strlen($first_name) > 30)
+    {
+        $name = substr(ucfirst($first_name), 0, 8);
+        $errors[] = $name . ' cannot be more than 30 characters';
+    }
     
-    function first_name_validated()
+    elseif(accepted_data_type($first_name, 'str') == false)
     {
-        global $first_name;
-
-        $message = ucfirst($first_name) . ' is not a valid first name';
-        if(has_presence($first_name, $msg = "First name cannot be blank") && accepted_field_length($first_name, 2, 30) && accepted_data_type($first_name, 'str', $message))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        $name = ucfirst($first_name);
+        $errors[] = $name . ' is not a valid first name';
     }
-
-    function last_name_validated()
+    if(has_presence($last_name) == false)
     {
-        global $last_name;
-
-        $message = ucfirst($last_name) . ' is not a valid last name';
-        if(has_presence($last_name, $msg = "Last name cannot be blank") && accepted_field_length($last_name, 2, 30) && accepted_data_type($last_name, 'str', $message))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        $errors[] = 'Last name cannot be empty';
     }
-
-    function email_validated()
+    elseif(strlen($last_name) < 2)
     {
-        global $email;
-
-        if(has_presence($email, $msg = "Email cannot be blank") && accepted_data_type($email, 'email'))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        $name = ucfirst($last_name);
+        $errors[] = $name . ' cannot be lesser than 2 characters';
     }
-
-    function business_name_validated()
+    elseif(strlen($last_name) > 30)
     {
-        global $business_name;
-
-        $message = ucfirst($business_name) . ' is not a valid business name';
-        if(has_presence($business_name, $msg = "business name cannot be blank") && accepted_field_length($business_name, 1, 255) && accepted_data_type($business_name, 'str2', $message))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        $name = substr(ucfirst($last_name), 0, 8);
+        $errors[] = $name . ' cannot be more than 30 characters';
     }
-
-    function TOS_validated()
+    elseif(accepted_data_type($last_name, 'str') == false)
     {
-        global $TOS;
-        if(is_checked($TOS, 'Terms of Service'))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        $name = ucfirst($last_name);
+        $errors[] = $name . ' is not a valid last name';
     }
-
-    function PRIP_validated()
+    if(has_presence($email) == false)
     {
-        global $PRIP;
-        if(is_checked($PRIP, 'Privacy Policy'))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        $errors[] = 'Email cannot be empty';
     }
-
-    //validating all fields
-    if(csrf_is_valid($_SESSION['csrf'], $post_csrf) && first_name_validated() && last_name_validated() && email_validated() && business_name_validated() && accepted_gender($gender) && TOS_validated() && PRIP_validated())
+    elseif(accepted_data_type($email, 'email') == false)
+    {
+        $errors[] = $email . ' is not a valid email';
+    }
+    if(has_presence($business_name) == false)
+    {
+        $errors[] = 'Business name cannot be empty';
+    }
+    elseif(strlen($business_name) < 1)
+    {
+        $name = ucfirst($business_name);
+        $errors[] = $name . ' cannot be lesser than 1 characters';
+    }
+    elseif(strlen($business_name) > 255)
+    {
+        $name = substr(ucfirst($business_name), 0, 8);
+        $errors[] = $name . ' cannot be more than 255 characters';
+    }
+    elseif(accepted_data_type($business_name, 'str2') == false)
+    {
+        $name = ucfirst($business_name);
+        $errors[] = $name . ' is not a valid business name';
+    }
+    if(accepted_gender($gender) == false)
+    {
+        $errors[] = 'Please select a gender';
+    }
+    if(is_checked($TOS, 'TOS') == false)
+    {
+        $errors[] = 'You have to accept the Terms of Service';
+    }
+    if(is_checked($PRIP, 'PRIP') == false)
+    {
+        $errors[] = 'You have to accept the Privacy Policy';
+    }
+    if(empty($errors))
     {
         //checking if the user already exists
         $count = db_row_count($email, 'email', 'users');
-        if($count <= 0)
+        if($count > 0)
         {
-            //insert user into email list table with source of 'u'
-            $values = array($first_name, $email, 'u');
+            $errors[] =  'This account already exists. Please login';
+        }
+        else
+        {
+            //insert user into email list table with source of 1
+            $values = array($first_name, $email, 1);
 
             $executed = insert_into_email_list($values);
 
@@ -131,7 +132,7 @@ if(isset($_POST['csrf']))
                 if($executed)
                 {
                     $set_from = array(
-                        'email' => 'support@bwajes-plus.andadel.com',
+                        'email' => 'developer@andadel.com',
                         'name' => 'bwajes+'
                     );
 
@@ -141,31 +142,57 @@ if(isset($_POST['csrf']))
                         'name' => $name
                     );
 
+                    $subject = 'Getting started with bwajes+';
+                    $body_msg = 'Your <b>password</b> is' . $password;
+                    $altbody = 'Your password is' . $password;
+                    $body = email_template($body_msg, 0);
+
                     $data = array(
+                        'subject' => $subject,
+                        'body' => $body,
+                        'altbody' => $altbody,
                         'password' => $password
                     );
 
-                    send_mail($set_from, $add_address, $data, 1);
+                    $mail_response = send_mail($set_from, $add_address, $data);
+                    if($mail_response !== true)
+                    {
+                        echo "<div class='card error'><div>" . $mail_response . "</div></div>";
+                    }
+                    else
+                    {
+                        $msg = "<div class='card success'><div>You've successfully registered and your account has been activated. Please check your email for your password and proceed to login</div></div>";
+                        echo $msg;
+                    }
                 }
                 else
                 {
-                    echo '<div class="card error">Ooops...Something went wrong. Please try again later';
+                    $errors[] = 'Ooops. Something went wrong. Please try again later';
+                }
+                if(!empty($errors))
+                {
+                    echo form_errors($errors);
                 }
             }
             else
             {
-                echo '<div class="card error">Ooops...Something went wrong. Please try again later';
+                $errors[] = 'Ooops. Something went wrong. Please try again later';
+            }
+            if(!empty($errors))
+            {
+                echo form_errors($errors);
             }
         }
-        else
+        if(!empty($errors))
         {
-            echo '<div class="card error">This account already exists. Please login';
+            echo form_errors($errors);
         }
     }
     else
     {
-        form_errors($errors);
+        echo form_errors($errors);
     }
+    
 
 }
 ?>

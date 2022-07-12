@@ -9,10 +9,11 @@
     <div class="wrapper form">
         <div class="content form">
             <form id="register_form">
-                <div id="registration_messages"></div>
-                <div class="form-group">
-                    <input type="hidden" class="form-control form_data" name="csrf" value="<?php echo $_SESSION['csrf']; ?>" id="csrf">
+                <div id="registration_messages">
                 </div>
+                <!-- <div class="form-group">
+                    <input type="hidden" class="form-control form_data" name="csrf" value="<?php //echo $_SESSION['csrf']; ?>" id="csrf">
+                </div> -->
                 <div class="form-group">
                     <label for="firstname">First name*</label>
                     <input type="text" class="form-control form_data" placeholder="Enter firstname" name="firstname" id="firstname">
@@ -44,10 +45,10 @@
                 </div>
                 <div class="form-group">
                     <input type="checkbox" name="PRIP" class="form_data" value="PRIP">
-                    <label for="PRIP">I understand that my information will be processed in line with Andadel's <a href="" target="_blank">Privacy Policy</a>. I may withdraw my consent through unsubscribe links at any time.</label>
+                    <label for="PRIP">I understand that my information will be processed in line with Andadel's <a href="" target="_blank">Privacy Policy</a> I may withdraw my consent through unsubscribe links at any time.</label>
                 </div>
                 <div class="form-group">
-                    <a style="color: white;" href="login">Sign me in instead</a>
+                    <a style="color: white;" href="login">Login instead</a>
                 </div>
                 <button name="register" class="btn btn-success form-control" id="registration_button">Sign up</button>
             </form>
@@ -58,12 +59,23 @@
 
         let form = document.getElementById('register_form');
         let registration_button = document.getElementById('registration_button');
+        let registration_messages = document.getElementById('registration_messages');
         form.addEventListener('submit', register_user);
 
         function register_user(e)
         {
             e.preventDefault();
             registration_button.disabled = true;
+
+            let reg_btn_bg_col = registration_button.style.backgroundColor;
+            let reg_btn_border = registration_button.style.border;
+
+            if(registration_button.disabled == true)
+            {
+                registration_button.style.backgroundColor = 'grey';
+                registration_button.style.border = 'grey';
+            }
+
             let form_element = document.getElementsByClassName('form_data');
             let form_data = new FormData();
 
@@ -96,10 +108,38 @@
                 {
                     registration_button.disabled = false;
 
+                    if(registration_button.disabled == false)
+                    {
+                        registration_button.style.backgroundColor = reg_btn_bg_col;
+                        registration_button.style.border = reg_btn_border;
+                    }
+
                     let response = xhr.responseText;
-                    // console.log(response);
-                    document.getElementById('registration_messages').innerHTML = response;
-                    form.reset();
+                    const pattern = /login/;
+                    let regex = pattern.test(response);
+                    if(regex === true)
+                    {
+                        form.reset();
+                    }
+                    // console.log(typeof(response));
+                    // let output = '<div class="card error">';
+                    // output += '<ul>';
+                    // for(const [key, value] of Object.entries(response))
+                    // {
+                    //     // console.log(`${key}: ${value}`);
+                    //     if(key == 'success' && response[key] != '')
+                    //     {
+                    //         output = '<div class="card success">';
+                    //         output += '<ul>';
+                    //         form.reset();
+                    //     }
+                    //     output += '<li>' + value + '</li>';
+                    // }
+                    // output += '</ul>';
+                    // output += '</div>';
+                    // registration_messages.innerHTML = output;
+                    registration_messages.innerHTML = response;
+                  
                 }
             }
             

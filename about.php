@@ -27,6 +27,8 @@
                         <div class="bwajes businesses"><p>businesses</p></div>
                         <div class="bwajes bloggers"><p>bloggers</p></div>
                         <div class="bwajes writers"><p>writers</p></div>
+                        <div class="bwajes academicians"><p>academicians</p></div>
+                        <div class="bwajes editors"><p>editors</p></div>
                         <div class="bwajes journalist"><p>journalist</p></div>
                         <div class="bwajes story-tellers"><p>story tellers</p></div>
                         <div class="bwajes others"><p>Others</p></div>

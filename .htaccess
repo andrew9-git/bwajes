@@ -7,6 +7,9 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^post/([0-9]+)/(.+?)$ post.php?p=$1&t=$2 [NC,L]
 
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^email/([0-9]+)$ email.php?eid=$1 [NC,L]
+
     # removing the php extension
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^([^\.]+)$ $1.php [NC,L]

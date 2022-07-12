@@ -7,7 +7,7 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 
-function send_mail(array $set_from, array $add_address, array $data=array(), $registration = 0, array $add_reply_to = array('email' => 'no-reply@bwajes-plus.andadel.com', 'message' => 'Do not reply to this mail'))
+function send_mail(array $set_from, array $add_address, array $data=array(), array $add_reply_to = array('email' => 'no-reply@bwajes-plus.andadel.com', 'message' => 'Do not reply to this mail'))
 {
     // require('vendor/autoload.php');
     require('vendor/phpmailer/phpmailer/src/PHPMailer.php');
@@ -18,16 +18,16 @@ function send_mail(array $set_from, array $add_address, array $data=array(), $re
     //Create an instance; passing `true` enables exceptions
     $mail = new PHPMailer(true);
 
-    try {
+    // try {
         //Server settings
-        $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+        $mail->SMTPDebug = SMTP::DEBUG_OFF;
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
+        $mail->Host       = 'andadel.com';//'smtp.gmail.com';//andadel.com
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'myphptestemail@gmail.com';
-        $mail->Password   = '@Deforce9';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->Username   = 'developer@andadel.com';//'myphptestemail@gmail.com';//developer@andadel.com
+        $mail->Password   = '@Abletechservices9';//'@Deforce9';//@Abletechservices9
+        $mail->SMTPSecure = 'ssl';//PHPMailer::ENCRYPTION_STARTTLS;//ssl
+        $mail->Port       = 465;//587;//465
 
         //Recipients
         $mail->setFrom($set_from['email'], $set_from['name']);
@@ -42,27 +42,20 @@ function send_mail(array $set_from, array $add_address, array $data=array(), $re
 
         //Content
         $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = 'Getting started with bwajes+';
-        $mail->Body    = 'Your <b>password</b> is' . $data['password'];
-        $mail->AltBody = 'Your password is' . $data['password'];
+        $mail->Subject = $data['subject'];
+        $mail->Body    = $data['body'];
+        $mail->AltBody = $data['altbody'];
 
-        if($mail->send())
+        if(!$mail->send())
         {
-            if($registration == 1)
-            {
-                // $msg = "You've successfully registered and your account has been activated. Please login";
-                // set_msg($msg);
-                // redirect_to('login');
-                echo 'successful registration!';
-            }
-            else
-            {
-                echo 'Message has been sent!';
-            }
-
+            return $mail->ErrorInfo;
         }
-        
-    } catch (Exception $e) {
-        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-    }
+        else
+        {
+            return true;
+        }
+    // } catch (Exception $e) {
+    //     $error = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+    //     return $error;
+    // }
 }
