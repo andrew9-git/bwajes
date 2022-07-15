@@ -150,6 +150,16 @@ function accepted_data_type($value, $field_type)
                 return true;
             }
         break;
+        case 'password': 
+            if(preg_match('/[^A-Za-z0-9&@\?\[\]\(\)\{\}\-_=\+]/', $value))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        break;
         default: return false;
         break;
     }
@@ -197,10 +207,10 @@ function accepted_gender($gender)
 }
 
 //validate checkbox field
-function is_checked($value, $checkbox_name)
+function is_checked($value)
 {
     
-    if($value == 0)
+    if(empty($value))
     {
         return false; 
     }
@@ -250,7 +260,7 @@ function form_errors(array $errors)
 // Database queries
 
 //uniqueness and row count
-function db_row_count($value, $column_name, $table_name, $dbname='bwajes+', $type='str')
+function db_row_count($value, $column_name, $table_name, $type='str', $dbname='bwajes+')
 {
     // 
 
@@ -281,16 +291,6 @@ function insert_into_email_list(array $values, $dbname='bwajes+')
 
     $execute = $db->execute();
 
-    if($execute)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
-
     return $execute;
 }
 
@@ -314,14 +314,80 @@ function insert_into_users(array $value, $dbname='bwajes+')
 
     $execute = $db->execute();
 
-    if($execute)
+    return $execute;
+}
+
+//getting a single row in a table
+function fetch_single_row($value, $column_name = 'id', $table_name, $type='str', $dbname='bwajes+')
+{
+    // 
+
+    $db = new dbase($dbname);
+
+    $query = "SELECT * FROM $table_name WHERE $column_name = :value";
+    $db->prep($query);
+    $db->bindvalue(':value', $value, $type);
+    $row = $db->fetchSingle();
+    return $row;
+}
+
+//update user statistics table
+
+function update_user_statistics(array $value, $level=1,  $dbname='bwajes+')
+{
+    
+
+    $db = new dbase($dbname);
+
+    $query = "";
+    $query .= "UPDATE user_statistics SET";
+    if($level = 1)
     {
-        return true;
+        $query .= " last_login = NOW(),";
+    }
+    elseif($level = 2)
+    {
+        $query .= " last_logout = NOW(),";
     }
     else
     {
-        return false;
+        $query .= " last_login = NOW(),";
+        $query .= " last_logout = NOW(),";
     }
+    $query .= " browser = :browser, os = :os, device_name = :device_name, updated_at = NOW() WHERE user_id = :user_id";
+    $db->prep($query);
+
+    $db->bindvalue(':user_id', $value['user_id'], 'int');
+    $db->bindvalue(':browser', $value['browser'], 'str');
+    $db->bindvalue(':os', $value['os'], 'str');
+    $db->bindvalue(':device_name', $value['device_name'], 'str');
+
+    $execute = $db->execute();
+
+    return $execute;
+}
+
+//insert into user statistics table
+
+function insert_into_user_statistics(array $value, $dbname='bwajes+')
+{
+    
+
+    $db = new dbase($dbname);
+
+    $query = "INSERT INTO user_statistics(user_id, last_login, last_logout, browser, os, device_name) VALUES(:user_id, :last_login, :last_logout, :browser, :os,:device_name)";
+    $db->prep($query);
+
+    $db->bindvalue(':user_id', $value[0], 'int');
+    $db->bindvalue(':last_login', $value[1], 'str');
+    $db->bindvalue(':last_logout', $value[2], 'str');
+    $db->bindvalue(':browser', $value[3], 'str');
+    $db->bindvalue(':os', $value[4], 'str');
+    $db->bindvalue(':device_name', $value[5], 'str');
+
+    $execute = $db->execute();
+
+    return $execute;
 }
 
 // End database queries

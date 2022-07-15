@@ -5,7 +5,8 @@ include('includes/phpmailer.php');
 include('includes/email-template.php');
 session_start();
 
-if(isset($_POST['email']))
+//for registration of users
+if(isset($_POST['businessname']))
 {
     // $post_csrf = $_POST['csrf'];
     $first_name = trim($_POST['firstname']);
@@ -17,7 +18,7 @@ if(isset($_POST['email']))
     $PRIP = trim($_POST['PRIP']);
     
     //generating password for user
-    $password='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-=+[]{}()@?';
+    $password='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-=+[]{}()@?&';
     $password = str_shuffle($password);
     $password = substr($password, 0, 8);
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -99,11 +100,11 @@ if(isset($_POST['email']))
     {
         $errors[] = 'Please select a gender';
     }
-    if(is_checked($TOS, 'TOS') == false)
+    if(is_checked($TOS) == false)
     {
         $errors[] = 'You have to accept the Terms of Service';
     }
-    if(is_checked($PRIP, 'PRIP') == false)
+    if(is_checked($PRIP) == false)
     {
         $errors[] = 'You have to accept the Privacy Policy';
     }
@@ -194,5 +195,148 @@ if(isset($_POST['email']))
     }
     
 
+}
+
+//to log in users to the app
+if(isset($_POST['csrf']))
+{
+    $post_csrf = $_POST['csrf'];
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    $remember_me = trim($_POST['remember_me']);
+
+    //error array
+    $errors = array();
+
+    if(csrf_is_valid($_SESSION['csrf'], $post_csrf) == false)
+    {
+        $errors[] = 'Ooops...Something went wrong. Please try again later';
+    }
+
+    if(has_presence($email) == false)
+    {
+        $errors[] = 'Email cannot be empty';
+    }
+    elseif(accepted_data_type($email, 'email') == false)
+    {
+        $name = ucfirst($email);
+        $errors[] = $name . ' is not a valid email';
+    }
+
+    if(has_presence($password) == false)
+    {
+        $errors[] = 'password cannot be empty';
+    }
+    elseif(accepted_data_type($password, 'password') == false)
+    {
+        $errors[] = $password . ' is not a valid password';
+    }
+
+    if(empty($errors))
+    {
+        //checking if the user already exists
+        $count = db_row_count($email, 'email', 'users');
+        if($count > 0)
+        {
+            //verifying password
+            $db_row = fetch_single_row($email, 'email', 'users');
+            $db_password = $db_row['password'];
+            if(password_verify($password, $db_password) == true)
+            {
+                //creating a remember me algorithm cookie
+                if(is_checked($remember_me) == true)
+                {
+                    setcookie('user_email', $email, time() + 10 * 365 * 24 * 60 * 60);
+                    setcookie('user_password', $password, time() + 10 * 365 * 24 * 60 * 60);
+                }
+                else
+                {
+                    if(isset($_COOKIE['user_email']))
+                    {
+                        setcookie('user_email', null, time() - 3600);
+                    }
+                    if(isset($_COOKIE['user_password']))
+                    {
+                        setcookie('user_password', null, time() - 3600);
+                    }
+                }
+
+                $id = $db_row['id'];
+                $firstname = $db_row['first_name'];
+                $lastname = $db_row['last_name'];
+                $user_email = $db_row['email'];
+                $time = time();
+
+                $_SESSION['user_data'] = array(
+                    'id' => $id,
+                    'first_name' => $firstname,
+                    'first_name' => $firstname,
+                    'email' => $user_email,
+                    'time' => $time
+                );
+
+                $_SESSION['is_user_logged_in'] = true;
+
+                //update user table by setting active to 1
+                $db = new dbase('bwajes+');
+                $query = "UPDATE users SET active = :active WHERE id = :id";
+                $db->prep($query);
+
+                $db->bindvalue(':id', $id, 'int');
+                $db->bindvalue(':active', 1, 'int');
+
+                $executed = $db->execute();
+
+                if($executed)
+                {
+                    //update or insert into user statistics table
+                    $count = db_row_count($id, 'user_id', 'user_statistics', 'int');
+                    if($count > 0)
+                    {
+                        //update user statistics table
+                        $last_login = date('Y-m-d H:i:s', $time);
+                        $values = array(
+                            'user_id' => $id,
+                            'browser' => '',
+                            'os' => '',
+                            'device_name' => ''
+                        );
+                        $executed = update_user_statistics($values);
+                        if($executed)
+                        {
+                            echo 'Success!';
+                        }
+                    }
+                    else
+                    {
+                        //insert into user statistics table
+                        $last_login = date('Y-m-d H:i:s', $time);
+                        $values = array($id, $last_login, '', '', '', '');
+                        $executed = insert_into_user_statistics($values);
+    
+                        if($executed)
+                        {
+                            echo 'Success!';
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                $msg = "<div class='card error'><div>The password provided is not correct</div></div>";
+                echo $msg;
+            }
+        }
+        else
+        {
+            $msg = "<div class='card error'><div>This account does not exists. Please create an account</div></div>";
+            echo $msg;
+        }
+    }
+    else
+    {
+        echo form_errors($errors);
+    }
 }
 ?>
