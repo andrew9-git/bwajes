@@ -257,6 +257,29 @@ function form_errors(array $errors)
 
 // End form validation functions
 
+//creating a remember me algorithm cookie
+function remember_me($value, $email, $password, $exp_time)
+{
+
+    if($value == 1)
+    {
+        setcookie('user_email', $email, $exp_time);
+        setcookie('user_password', $password, $exp_time);
+    }
+    else
+    {
+        if(isset($_COOKIE['user_email']))
+        {
+            setcookie('user_email', null, time() - 3600);
+        }
+        if(isset($_COOKIE['user_password']))
+        {
+            setcookie('user_password', null, time() - 3600);
+        }
+    }
+
+}
+
 // Database queries
 
 //uniqueness and row count

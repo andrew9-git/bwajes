@@ -243,23 +243,9 @@ if(isset($_POST['csrf']))
             $db_password = $db_row['password'];
             if(password_verify($password, $db_password) == true)
             {
-                //creating a remember me algorithm cookie
-                if(is_checked($remember_me) == true)
-                {
-                    setcookie('user_email', $email, time() + 10 * 365 * 24 * 60 * 60);
-                    setcookie('user_password', $password, time() + 10 * 365 * 24 * 60 * 60);
-                }
-                else
-                {
-                    if(isset($_COOKIE['user_email']))
-                    {
-                        setcookie('user_email', null, time() - 3600);
-                    }
-                    if(isset($_COOKIE['user_password']))
-                    {
-                        setcookie('user_password', null, time() - 3600);
-                    }
-                }
+                //cookie remember me function implementation
+                $cookie_exp_time = time() + 10 * 365 * 24 * 60 * 60;
+                remember_me($remember_me, $email, $password, $cookie_exp_time);
 
                 $id = $db_row['id'];
                 $firstname = $db_row['first_name'];

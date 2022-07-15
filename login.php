@@ -24,7 +24,7 @@
                     <input type="password" name="password" value="<?php if(isset($_COOKIE['user_password'])){echo $_COOKIE['user_password'];} ?>" class="form-control form_data" id="password">
                 </div>
                 <div class="form-group">
-                    <input type="checkbox" name="remember_me" class="form_data" value="remember-me" <?php if(isset($_COOKIE['user_email'])){echo 'checked';} ?>>
+                    <input type="checkbox" name="remember_me" class="form_data" <?php if(isset($_COOKIE['user_email'])){?> checked <?php } ?>>
                     <label for="remember-me">Remember me</label>
                 </div>
                 <div class="form-group">
@@ -134,7 +134,7 @@
         }
 
     });
-</script>
+    </script>
 <?php
 
     include('includes/footer.php');
