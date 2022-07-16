@@ -11,6 +11,7 @@
         <div class="content form">
             <form id="login_form">
                 <div id="login_messages">
+                    <?php display_msg(); ?>
                 </div>
                 <div class="form-group">
                     <input type="hidden" class="form-control form_data" name="csrf" value="<?php echo $_SESSION['csrf']; ?>" id="csrf">
@@ -52,11 +53,13 @@
 
             let log_btn_bg_col = login_button.style.backgroundColor;
             let log_btn_border = login_button.style.border;
+            let log_btn_cursor = login_button.style.cursor;
 
             if(login_button.disabled == true)
             {
                 login_button.style.backgroundColor = 'grey';
                 login_button.style.border = 'grey';
+                login_button.style.cursor = 'not-allowed';
             }
 
             let form_element = document.getElementsByClassName('form_data');
@@ -95,6 +98,7 @@
                     {
                         login_button.style.backgroundColor = log_btn_bg_col;
                         login_button.style.border = log_btn_border;
+                        login_button.style.cursor = log_btn_cursor;
                     }
 
                     let response = xhr.responseText;

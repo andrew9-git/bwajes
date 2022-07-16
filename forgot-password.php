@@ -20,7 +20,7 @@
                 <br>
                 <div class="form-group">
                     <label for="email">Email*</label>
-                    <input type="text" class="form-control form_data" name="forgot-password-email" placeholder="Enter email" id="email">
+                    <input type="text" class="form-control form_data" name="forgot_password_email" placeholder="Enter email" id="email">
                 </div>
                 <button name="send-mail" id="forgot_password_button" class="btn btn-danger form-control">Send</button>
             </form>
@@ -41,11 +41,13 @@
 
             let for_pass_btn_bg_col = forgot_password_button.style.backgroundColor;
             let for_pass_btn_border = forgot_password_button.style.border;
+            let for_pass_btn_cursor = forgot_password_button.style.cursor;
 
             if(forgot_password_button.disabled == true)
             {
                 forgot_password_button.style.backgroundColor = 'grey';
                 forgot_password_button.style.border = 'grey';
+                forgot_password_button.style.cursor = 'not-allowed';
             }
 
             let form_element = document.getElementsByClassName('form_data');
@@ -72,19 +74,17 @@
                     {
                         forgot_password_button.style.backgroundColor = for_pass_btn_bg_col;
                         forgot_password_button.style.border = for_pass_btn_border;
+                        forgot_password_button.style.cursor = for_pass_btn_cursor;
                     }
 
                     let response = xhr.responseText;
-                    const pattern = /Success!/;
+                    const pattern = /request/;
                     let regex = pattern.test(response);
-                    if(regex === false)
+                    if(regex === true)
                     {
-                        forgot_password_messages.innerHTML = response;
+                        form.reset(); 
                     }
-                    else
-                    {
-                        form.reset();
-                    }
+                    forgot_password_messages.innerHTML = response;
                   
                 }
             }

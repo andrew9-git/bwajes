@@ -10,6 +10,9 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^email/([0-9]+)$ email.php?eid=$1 [NC,L]
 
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^reset-password/([0-9a-fA-f]+)/([0-9a-fA-f]+)$ reset-password.php?selector=$1&token=$2 [NC,L]
+
     # removing the php extension
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^([^\.]+)$ $1.php [NC,L]

@@ -69,11 +69,13 @@
 
             let reg_btn_bg_col = registration_button.style.backgroundColor;
             let reg_btn_border = registration_button.style.border;
+            let reg_btn_cursor = registration_button.style.cursor;
 
             if(registration_button.disabled == true)
             {
                 registration_button.style.backgroundColor = 'grey';
                 registration_button.style.border = 'grey';
+                registration_button.style.cursor = 'not-allowed';
             }
 
             let form_element = document.getElementsByClassName('form_data');
@@ -112,6 +114,7 @@
                     {
                         registration_button.style.backgroundColor = reg_btn_bg_col;
                         registration_button.style.border = reg_btn_border;
+                        registration_button.style.cursor = reg_btn_cursor;
                     }
 
                     let response = xhr.responseText;

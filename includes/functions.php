@@ -35,7 +35,7 @@ function display_msg()
 {
     if(isset($_SESSION['setmsg']))
     {
-        echo '<div class="card success"><div class="card-header"></div><div class="card-body">' . $_SESSION['setmsg'] . '</div></div>';
+        echo '<div class="card success"><div>' . $_SESSION['setmsg'] . '</div></div>';
         $_SESSION['setmsg'] = null;
     }
 }
@@ -407,6 +407,81 @@ function insert_into_user_statistics(array $value, $dbname='bwajes+')
     $db->bindvalue(':browser', $value[3], 'str');
     $db->bindvalue(':os', $value[4], 'str');
     $db->bindvalue(':device_name', $value[5], 'str');
+
+    $execute = $db->execute();
+
+    return $execute;
+}
+
+function delete_single_row($value, $column_name = 'id', $table_name, $type='str', $dbname='bwajes+')
+{
+    
+
+    $db = new dbase($dbname);
+
+    $query = "DELETE FROM $table_name WHERE $column_name = :value";
+
+    $db->prep($query);
+
+    $db->bindvalue(':value', $value, $type);
+
+    $execute = $db->execute();
+
+    return $execute;
+}
+
+//inserting values into email list table
+
+function insert_into_forgot_password(array $values, $dbname='bwajes+')
+{
+    
+
+    $db = new dbase($dbname);
+
+    $query = "INSERT INTO forgot_password(email, selector, token, expires) VALUES(:email, :selector, :token, :expires)";
+
+    $db->prep($query);
+
+    $db->bindvalue(':email', $values['email'], 'str');
+    $db->bindvalue(':selector', $values['selector'], 'str');
+    $db->bindvalue(':token', $values['token'], 'str');
+    $db->bindvalue(':expires', $values['expires'], 'str');
+
+    $execute = $db->execute();
+
+    return $execute;
+}
+
+//selecting tokens that have not expired
+function fetch_forgot_password(array $value, $dbname='bwajes+')
+{
+    // 
+
+    $db = new dbase($dbname);
+
+    $query = "SELECT * FROM forgot_password WHERE selector = :selector AND expires >= :current_time";
+    $db->prep($query);
+    $db->bindvalue(':selector', $value['selector'], 'str');
+    $db->bindvalue(':current_time', $value['current_time'], 'str');
+    $row = $db->fetchSingle();
+    return $row;
+}
+
+//update user statistics table
+
+function update_user_password(array $value, $dbname='bwajes+')
+{
+    
+
+    $db = new dbase($dbname);
+
+    $query = "";
+    $query .= "UPDATE users SET";
+    $query .= " password = :password WHERE email = :email";
+    $db->prep($query);
+
+    $db->bindvalue(':email', $value['email'], 'str');
+    $db->bindvalue(':password', $value['password'], 'str');
 
     $execute = $db->execute();
 
