@@ -15,7 +15,8 @@ function url()
 {
     $host='http://localhost:9090/bwajes/';
     $host1 = 'http://localhost:9090/andadel/';
-    return array($host, $host1);
+    $host2 = 'http://localhost:9090/bwajesplus-app/';
+    return array($host, $host1, $host2);
 }
 
 function redirect_to($url)
@@ -280,6 +281,154 @@ function remember_me($value, $email, $password, $exp_time)
 
 }
 
+//checking if the user has already logged in or not
+function user_is_logged_in()
+{
+    if(isset($_SESSION['is_user_logged_in']))
+    {
+        return true;
+    }
+    return false;
+}
+
+function get_user_browser()
+{
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+	$browser        = "Unknown";
+	$browser_array  = array(
+		'/msie/i'       =>  'Internet Explorer',
+		'/firefox/i'    =>  'Firefox',
+		'/safari/i'     =>  'Safari',
+		'/chrome/i'     =>  'Chrome',
+		'/edge/i'       =>  'Edge',
+		'/opera/i'      =>  'Opera',
+		'/netscape/i'   =>  'Netscape',
+		'/maxthon/i'    =>  'Maxthon',
+		'/konqueror/i'  =>  'Konqueror',
+		'/mobile/i'     =>  'Handheld Browser'
+	);
+
+	foreach ( $browser_array as $regex => $value ) { 
+		if ( preg_match( $regex, $user_agent ) ) {
+			$browser = $value;
+		}
+	}
+	return $browser;    
+}
+
+function get_user_os()
+{
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+	$os_platform =   "Unknown";
+	$os_array =   array(
+        '/windows nt 11/i'      =>  'Windows 11',
+		'/windows nt 10/i'      =>  'Windows 10',
+		'/windows nt 6.3/i'     =>  'Windows 8.1',
+		'/windows nt 6.2/i'     =>  'Windows 8',
+		'/windows nt 6.1/i'     =>  'Windows 7',
+		'/windows nt 6.0/i'     =>  'Windows Vista',
+		'/windows nt 5.2/i'     =>  'Windows Server 2003/XP x64',
+		'/windows nt 5.1/i'     =>  'Windows XP',
+		'/windows xp/i'         =>  'Windows XP',
+		'/windows nt 5.0/i'     =>  'Windows 2000',
+		'/windows me/i'         =>  'Windows ME',
+		'/win98/i'              =>  'Windows 98',
+		'/win95/i'              =>  'Windows 95',
+		'/win16/i'              =>  'Windows 3.11',
+		'/macintosh|mac os x/i' =>  'Mac OS X',
+		'/mac_powerpc/i'        =>  'Mac OS 9',
+		'/linux/i'              =>  'Linux',
+		'/ubuntu/i'             =>  'Ubuntu',
+		'/ios/i'                =>  'IPhone',
+		'/android/i'            =>  'Android',
+		'/blackberry/i'         =>  'BlackBerry',
+		'/webos/i'              =>  'Mobile'
+	);
+
+	foreach ( $os_array as $regex => $value ) { 
+		if ( preg_match($regex, $user_agent ) ) {
+			$os_platform = $value;
+		}
+	}   
+	return $os_platform; 
+}
+
+function get_user_device_name()
+{
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+	$device_name =   "Unknown";
+	$device_array =   array(
+        '/(sm | samsung)/i'        =>  'Samsung',
+		'/(moto | motorola)/i'     =>  'Motorola',
+		'/blazer/i'                =>  'Blazer',
+		'/palm/i'                  =>  'Palm',
+		'/handspring/i'            =>  'Handspring',
+		'/nokia/i'                 =>  'Nokia',
+		'/kyocera/i'               =>  'Kyocera',
+		'/smartphone/i'            =>  'Smartphone',
+		'/windows ce/i'            =>  'Windows CE',
+		'/blackberry/i'            =>  'Blackberry',
+		'/wap/i'                   =>  'Wap',
+		'/(sony | sonyericsson)/i' =>  'sony Ericsson',
+		'/playstation/i'           =>  'Playstation',
+		'/lg/i'                    =>  'LG',
+		'/mmp/i'                   =>  'MMP',
+		'/opwv/i'                  =>  'OPWV',
+		'/symbian/i'               =>  'Symbian',
+		'/epoc/i'                  =>  'Epoc',
+		'/pixel/i'                 =>  'Google pixel',
+		'/nexus/i'                 =>  'Nexus',
+		'/ipad/i'                  =>  'iPad',
+		'/iphone/i'                =>  'iPhone',
+		'/ipod/i'                  =>  'iPod',
+		'/microsoft/i'             =>  'Microsoft',
+		'/nvidia/i'                =>  'Nvidia',
+		'/macintosh/i'             =>  'Macintosh',
+		'/(rm | realme)/i'         =>  'Realme',
+		'/vivo/i'                  =>  'Vivo',
+		'/oppo/i'                  =>  'Oppo',
+		'/infinix/i'               =>  'Infinix',
+		'/(ntn | kob)/i'           =>  'Huawei',
+		'/(redmi | xiaomi)/i'      =>  'Xiaomi',
+		'/techno/i'                =>  'Techno',
+		'/lenovo/i'                =>  'Lenovo',
+		'/voda/i'                  =>  'Vodaphone',
+		'/asus/i'                  =>  'Asus',
+		'/acer/i'                  =>  'Acer',
+		'/alcatel/i'               =>  'Alcatel',
+		'/gionee/i'                =>  'Gionee',
+		'/fair/i'                  =>  'Fairphone',
+		'/dell/i'                  =>  'Dell',
+		'/msi/i'                   =>  'MSi',
+		'/toshiba/i'               =>  'Toshiba',
+		'/ibm/i'                   =>  'IBM',
+		'/intel/i'                 =>  'Intel',
+		'/razer/i'                 =>  'Razer',
+		'/compaq/i'                =>  'Compaq',
+		'/gigabyte/i'              =>  'Gigabyte',
+		'/alienware/i'             =>  'Alienware',
+		'/fujitsu/i'               =>  'Fujitsu',
+		'/nec/i'                   =>  'NEC',
+		'/gateway/i'               =>  'Gateway',
+		'/commodore/i'             =>  'Commodore',
+		'/evga/i'                  =>  'Evga',
+		'/corsair/i'               =>  'Corsair Gaming',
+		'/elitegroup/i'            =>  'Elitegroup Computer Systems',
+		'/falcon/i'                =>  'Falcon Northwest',
+		'/htc/i'                   =>  'HTC'
+	);
+
+	foreach ( $device_array as $regex => $value ) { 
+		if ( preg_match($regex, $user_agent ) ) {
+			$device_name = $value;
+		}
+	}   
+	return $device_name; 
+}
+
 // Database queries
 
 //uniqueness and row count
@@ -367,9 +516,11 @@ function update_user_statistics(array $value, $level=1,  $dbname='bwajes+')
     if($level = 1)
     {
         $query .= " last_login = NOW(),";
+        $query .= " last_logout = NULL,";
     }
     elseif($level = 2)
     {
+        $query .= " last_login = NULL,";
         $query .= " last_logout = NOW(),";
     }
     else
@@ -410,6 +561,21 @@ function insert_into_user_statistics(array $value, $dbname='bwajes+')
 
     $execute = $db->execute();
 
+    return $execute;
+}
+
+//update user table by setting active to 1
+function set_active_to_1($id)
+{
+    $db = new dbase('bwajes+');
+    $query = "UPDATE users SET active = :active WHERE id = :id";
+    $db->prep($query);
+
+    $db->bindvalue(':id', $id, 'int');
+    $db->bindvalue(':active', 1, 'int');
+
+    $execute = $db->execute();
+    
     return $execute;
 }
 

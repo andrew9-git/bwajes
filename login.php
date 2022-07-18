@@ -9,6 +9,13 @@
 
 <div class="wrapper form">
         <div class="content form">
+            <?php 
+                if(user_is_logged_in() == true)
+                {
+                    $url = url()[2] . 'dashboard';
+                    redirect_to($url);
+                }
+            ?>
             <form id="login_form">
                 <div id="login_messages">
                     <?php display_msg(); ?>

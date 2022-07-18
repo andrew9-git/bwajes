@@ -263,14 +263,7 @@ if(isset($_POST['csrf']))
                 $_SESSION['is_user_logged_in'] = true;
 
                 //update user table by setting active to 1
-                $db = new dbase('bwajes+');
-                $query = "UPDATE users SET active = :active WHERE id = :id";
-                $db->prep($query);
-
-                $db->bindvalue(':id', $id, 'int');
-                $db->bindvalue(':active', 1, 'int');
-
-                $executed = $db->execute();
+                $executed = set_active_to_1($id);
 
                 if($executed)
                 {
@@ -280,11 +273,14 @@ if(isset($_POST['csrf']))
                     {
                         //update user statistics table
                         $last_login = date('Y-m-d H:i:s', $time);
+                        $browser = get_user_browser();
+                        $os = get_user_os();
+                        $device_name = get_user_device_name();
                         $values = array(
                             'user_id' => $id,
-                            'browser' => '',
-                            'os' => '',
-                            'device_name' => ''
+                            'browser' => $browser,
+                            'os' => $os,
+                            'device_name' => $device_name
                         );
                         $executed = update_user_statistics($values);
                         if($executed)
@@ -301,7 +297,10 @@ if(isset($_POST['csrf']))
                     {
                         //insert into user statistics table
                         $last_login = date('Y-m-d H:i:s', $time);
-                        $values = array($id, $last_login, '', '', '', '');
+                        $browser = get_user_browser();
+                        $os = get_user_os();
+                        $device_name = get_user_device_name();
+                        $values = array($id, $last_login, NULL, $browser, $os, $device_name);
                         $executed = insert_into_user_statistics($values);
     
                         if($executed)
